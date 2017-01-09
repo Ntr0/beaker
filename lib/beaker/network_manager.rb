@@ -56,6 +56,16 @@ module Beaker
       @options['HOSTS'].each_key do |name|
         host_hash = @options['HOSTS'][name]
         hypervisor = host_hash['hypervisor']
+        if hypervisor == 'vagrant'
+          # if default vagrant provider is set by environment variable use the correct
+          # hypervisor type
+          providers = ['fusion', 'libvirt', 'parallels', 'virtualbox', 'workstation']
+
+          if ! ENV['VAGRANT_DEFAULT_PROVIDER'].nil? && providers.has?(ENV['VAGRANT_DEFAULT_PROVIDER'])
+            hypervisor = "vagrant_#{ENV['VAGRANT_DEFAULT_PROVIDER']}"
+          end
+
+        end
         hypervisor = provision?(@options, host_hash) ? host_hash['hypervisor'] : 'none'
         @logger.debug "Hypervisor for #{name} is #{hypervisor}"
         @machines[hypervisor] = [] unless @machines[hypervisor]
